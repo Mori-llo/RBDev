@@ -1,0 +1,70 @@
+Create a menu screen where the camera shows a part of your game world as the background (like a cinematic scene), and your UI sits on top of it.
+
+🔧 Steps to Do This:
+1. Create a Menu Camera in Workspace
+In Workspace, insert a Part (name it something like "MenuCam").
+
+Set its position and rotation to point at the area you want to show.
+
+Optional: Make the part Anchored, Transparent, and CanCollide = false.
+
+2. Add a LocalScript in StarterGui
+Inside StarterGui, create a ScreenGui → add a LocalScript inside it.
+
+This script sets the camera and shows the UI.
+
+3. LocalScript Example:
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- Camera part for menu view
+local menuCamPart = workspace:WaitForChild("MenuCam")
+
+-- UI elements
+local screenGui = script.Parent
+local playButton = screenGui:WaitForChild("PlayButton")
+
+-- Set camera to show the menu view
+camera.CameraType = Enum.CameraType.Scriptable
+camera.CFrame = menuCamPart.CFrame
+
+-- Optional: Lock player input during menu
+local StarterGui = game:GetService("StarterGui")
+StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+
+-- Handle Play button click
+playButton.MouseButton1Click:Connect(function()
+    -- Restore camera
+    camera.CameraType = Enum.CameraType.Custom
+
+    -- Hide the menu UI
+    screenGui.Enabled = false
+
+    -- Optional: Enable player controls again
+    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.All, true)
+
+    -- Optional: Force spawn if needed
+    if not player.Character or not player.Character:FindFirstChild("Humanoid") then
+        player:LoadCharacter()
+    end
+end)
+
+4. Add Your UI on Top
+Inside the same ScreenGui, add:
+
+TextLabel for title
+
+TextButton or ImageButton for Play, Settings, etc.
+
+Since the camera is showing a live scene from the world, and your UI is overlaid, it looks like the scene is the background.
+
+🌟 Optional Improvements
+Feature	How to Do It
+Fade in/out effect	Use a black Frame and TweenService to fade.
+Smooth camera motion	Use TweenService to move the camera smoothly.
+Disable player controls	Do not load character or pause gameplay until Play is clicked.
+Revert to default camera	On clicking Play, set Camera.CameraType = "Custom" and load the player.
+
+
