@@ -1,0 +1,62 @@
+Step-by-Step: Saving the Sprint Script
+1. Open Roblox Studio
+Open your game or create a new one.
+
+2. Locate the Right Folder
+In the Explorer, find:
+StarterPlayer → StarterPlayerScripts
+
+3. Insert a LocalScript
+Right-click on StarterPlayerScripts
+→ Insert Object
+→ Select LocalScript
+
+4. Paste the Sprint Script
+Delete the default code inside the LocalScript.
+
+Copy and paste this sprint code into it:
+
+lua
+Copy
+Edit
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+local normalSpeed = 16
+local sprintSpeed = 28
+
+-- Reapply humanoid reference if character respawns
+player.CharacterAdded:Connect(function(char)
+	character = char
+	humanoid = character:WaitForChild("Humanoid")
+end)
+
+-- Detect key press
+UserInputService.InputBegan:Connect(function(input, isTyping)
+	if isTyping then return end
+	if input.KeyCode == Enum.KeyCode.LeftShift then
+		if humanoid then
+			humanoid.WalkSpeed = sprintSpeed
+		end
+	end
+end)
+
+-- Detect key release
+UserInputService.InputEnded:Connect(function(input, isTyping)
+	if input.KeyCode == Enum.KeyCode.LeftShift then
+		if humanoid then
+			humanoid.WalkSpeed = normalSpeed
+		end
+	end
+end)
+5. Test the Game
+Click Play or Play Here in Studio.
+
+Try holding Shift to sprint and releasing to walk normally.
+
+💡 Optional: Rename the Script
+Right-click the script → Rename → name it something like "SprintScript" to stay organized.
