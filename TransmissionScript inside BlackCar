@@ -1,0 +1,145 @@
+-- TransmissionScript inside BlackCar
+
+local car = script.Parent.Parent -- BlackCar model
+local seat = car:FindFirstChildWhichIsA("VehicleSeat")
+
+if not seat then
+    warn("No VehicleSeat found in " .. car.Name)
+    return
+end
+
+local maxspeed = 20
+local minspeed = 0
+local currspeed = 0
+local inuse = false
+
+-- Values inside the script (make sure they exist!)
+local gear = script:WaitForChild("Gear") -- IntValue
+local gearType = script:WaitForChild("GearType") -- StringValue
+local minSpeedVal = script:WaitForChild("MinimumSpeed") -- NumberValue
+local maxSpeedVal = script:WaitForChild("MaximumSpeed") -- NumberValue
+
+-- Utility: calculate speed
+local function getSpeed()
+    local v = seat.Velocity
+    return math.floor(math.sqrt(v.X ^ 2 + v.Y ^ 2 + v.Z ^ 2))
+end
+
+-- Gear functions
+local function gear1()
+    maxspeed = 20
+    minspeed = 0
+    repeat
+        currspeed = getSpeed()
+        seat.MaxSpeed = currspeed + 2
+        print("1st Gear")
+        task.wait(0.1)
+        if seat.Throttle ~= 1 then break end
+    until currspeed >= maxspeed
+    inuse = false
+    GearCheck()
+end
+
+local function gear2()
+    maxspeed = 40
+    minspeed = 20
+    repeat
+        currspeed = getSpeed()
+        seat.MaxSpeed = currspeed + 2
+        print("2nd Gear")
+        task.wait(0.15)
+        if seat.Throttle ~= 1 then break end
+    until currspeed >= maxspeed
+    inuse = false
+    GearCheck()
+end
+
+local function gear3()
+    maxspeed = 60
+    minspeed = 40
+    repeat
+        currspeed = getSpeed()
+        seat.MaxSpeed = currspeed + 2
+        print("3rd Gear")
+        task.wait(0.2)
+        if seat.Throttle ~= 1 then break end
+    until currspeed >= maxspeed
+    inuse = false
+    GearCheck()
+end
+
+local function gear4()
+    maxspeed = 80
+    minspeed = 60
+    repeat
+        currspeed = getSpeed()
+        seat.MaxSpeed = currspeed + 2
+        print("4th Gear")
+        task.wait(0.25)
+        if seat.Throttle ~= 1 then break end
+    until currspeed >= maxspeed
+    inuse = false
+    GearCheck()
+end
+
+local function gear5()
+    maxspeed = 100
+    minspeed = 80
+    repeat
+        currspeed = getSpeed()
+        seat.MaxSpeed = currspeed + 2
+        print("5th Gear")
+        task.wait(0.3)
+        if seat.Throttle ~= 1 then break end
+    until currspeed >= maxspeed
+    inuse = false
+    GearCheck()
+end
+
+-- Gear logic
+function GearCheck()
+    if seat.Throttle == 1 then
+        print("Going Forward")
+        currspeed = getSpeed()
+
+        -- Auto gear shifting
+        if currspeed >= maxspeed - 2 and gear.Value < 5 then
+            gear.Value = gear.Value + 1
+            print("Gearing up → " .. gear.Value)
+        end
+
+        -- Select gear behavior
+        if gear.Value == 1 and not inuse then inuse = true gear1() end
+        if gear.Value == 2 and not inuse then inuse = true gear2() end
+        if gear.Value == 3 and not inuse then inuse = true gear3() end
+        if gear.Value == 4 and not inuse then inuse = true gear4() end
+        if gear.Value == 5 and not inuse then inuse = true gear5() end
+
+        if gear.Value >= 5 then
+            seat.MaxSpeed = 100
+            print("Top Speed Reached")
+        end
+
+    elseif seat.Throttle == 0 then
+        -- Adjust gear down when idle
+        currspeed = getSpeed()
+        if currspeed < 5 then gear.Value = 0
+        elseif currspeed < 20 then gear.Value = 1
+        elseif currspeed < 40 then gear.Value = 2
+        elseif currspeed < 60 then gear.Value = 3
+        elseif currspeed < 80 then gear.Value = 4
+        else gear.Value = 5 end
+
+    elseif seat.Throttle == -1 then
+        gear.Value = -1
+        seat.MaxSpeed = 30
+        print("Reversing")
+    end
+end
+
+-- React to seat changes
+seat.Changed:Connect(function(change)
+    if change == "Throttle" then
+        GearCheck()
+    end
+end)
