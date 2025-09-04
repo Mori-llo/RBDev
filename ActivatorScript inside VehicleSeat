@@ -1,0 +1,82 @@
+-- ActivatorScript inside VehicleSeat
+local seat = script.Parent
+local car = seat.Parent
+local activator = script
+
+-- Make sure required assets exist
+local guiTemplate = activator:FindFirstChild("GUI")
+local transmissionTemplate = activator:FindFirstChild("TransmissionScript")
+local lightScript = activator:FindFirstChild("LightScript")
+
+-- When someone sits
+local function onChildAdded(child)
+	if child.Name == "SeatWeld" then
+		-- Adjust sitting position
+		child.C0 = CFrame.new(0, (seat.Size.Y / 2 + 1.5), 0)
+		child.C1 = CFrame.new(0.5, -0.5, 0)
+
+		-- Check if it's a player
+		local humanoid = child.Part1.Parent:FindFirstChild("Humanoid")
+		if humanoid then
+			local character = humanoid.Parent
+			local player = game.Players:GetPlayerFromCharacter(character)
+
+			if player then
+				-- Rename the car to the player’s name
+				car.Name = player.Name .. "'s Car"
+
+				-- Clone GUI into PlayerGui
+				if guiTemplate and player:FindFirstChild("PlayerGui") then
+					local guiClone = guiTemplate:Clone()
+					guiClone.Parent = player.PlayerGui
+				end
+
+				-- Clone TransmissionScript into Backpack
+				if transmissionTemplate and player:FindFirstChild("Backpack") then
+					local tsClone = transmissionTemplate:Clone()
+					tsClone.Parent = player.Backpack
+				end
+
+				-- Enable lights
+				if lightScript then
+					lightScript.Disabled = false
+				end
+			end
+		end
+	end
+end
+
+-- When someone leaves the seat
+local function onChildRemoved(child)
+	if child.Name == "SeatWeld" then
+		local humanoid = child.Part1.Parent:FindFirstChild("Humanoid")
+		if humanoid then
+			local character = humanoid.Parent
+			local player = game.Players:GetPlayerFromCharacter(character)
+
+			if player then
+				-- Remove GUI
+				local playerGui = player:FindFirstChild("PlayerGui")
+				if playerGui then
+					local oldGui = playerGui:FindFirstChild("GUI")
+					if oldGui then oldGui:Destroy() end
+				end
+
+				-- Remove TransmissionScript
+				local backpack = player:FindFirstChild("Backpack")
+				if backpack then
+					local oldTS = backpack:FindFirstChild("TransmissionScript")
+					if oldTS then oldTS:Destroy() end
+				end
+
+				-- Disable lights
+				if lightScript then
+					lightScript.Disabled = true
+				end
+			end
+		end
+	end
+end
+
+seat.ChildAdded:Connect(onChildAdded)
+seat.ChildRemoved:Connect(onChildRemoved)
